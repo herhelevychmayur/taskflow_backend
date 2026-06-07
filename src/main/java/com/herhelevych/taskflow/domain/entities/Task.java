@@ -11,7 +11,7 @@ import org.hibernate.type.SqlTypes;
 import java.time.Instant;
 import java.util.UUID;
 
-@Table(name = "users")
+@Table(name = "tasks")
 @Entity
 public class Task {
     @Id

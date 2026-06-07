@@ -30,8 +30,12 @@ public class User {
     private String password;
 
     @Column(nullable = false)
+    private String fullName;
+
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Builder.Default
     private GlobalRole role = GlobalRole.ROLE_USER;
 
     @CreationTimestamp
@@ -41,15 +45,19 @@ public class User {
     private Instant updatedAt;
 
     @OneToMany(mappedBy = "user")
+    @Builder.Default
     private List<ProjectMember> projects = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
+    @Builder.Default
     private List<Comment> comments = new ArrayList<>();
 
     @OneToMany(mappedBy = "creator_id")
+    @Builder.Default
     private List<Task> createdTasks = new ArrayList<>();
 
     @OneToMany(mappedBy = "assignee_id")
+    @Builder.Default
     private List<Task> assignedTasks = new ArrayList<>();
 
     @Override
