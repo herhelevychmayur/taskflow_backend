@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import java.time.Instant;
 import java.util.UUID;
 
 public record TaskCreateRequest(
@@ -19,6 +20,8 @@ public record TaskCreateRequest(
         @NotNull
         TaskPriority priority,
 
-        UUID assigneeId
+        UUID assigneeId,
+
+        Instant dueDate
 ) {
 }

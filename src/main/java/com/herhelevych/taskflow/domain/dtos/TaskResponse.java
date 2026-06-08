@@ -15,8 +15,11 @@ public record TaskResponse(
         TaskPriority priority,
         UUID assigneeId,
         String assigneeFullName,
+        String assigneeUsername,
         UUID creatorId,
         String creatorFullName,
+        String creatorUsername,
+        Instant dueDate,
         Instant createdAt,
         Instant updatedAt
 ) {

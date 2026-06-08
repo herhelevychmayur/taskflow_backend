@@ -46,11 +46,13 @@ public class Task {
 
     @ManyToOne
     @JoinColumn(name = "assignee_id")
-    private User assignee_id;
+    private User assignee;
 
     @ManyToOne
     @JoinColumn(name = "creator_id")
-    private User creator_id;
+    private User creator;
+
+    private Instant dueDate;
 
     @CreationTimestamp
     private Instant createdAt;

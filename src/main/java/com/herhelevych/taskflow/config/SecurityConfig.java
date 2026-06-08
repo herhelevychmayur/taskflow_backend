@@ -1,6 +1,11 @@
 package com.herhelevych.taskflow.config;
 
+import com.herhelevych.taskflow.domain.GlobalRole;
+import com.herhelevych.taskflow.domain.entities.User;
+import com.herhelevych.taskflow.repositories.UserRepository;
 import com.herhelevych.taskflow.security.JwtAuthFilter;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -55,5 +60,25 @@ public class SecurityConfig {
         return source;
     }
 
+    @Bean
+    public CommandLineRunner adminInit(
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder,
+            @Value("${admin.fullName}") String fullName,
+            @Value("${admin.username}") String username,
+            @Value("${admin.password}") String password
+            ) {
+        return args -> {
+            if (userRepository.findByUsername(username).isEmpty()) {
+                User admin = User.builder()
+                        .username(username)
+                        .password(passwordEncoder.encode(password))
+                        .fullName(fullName)
+                        .role(GlobalRole.ROLE_SUPERADMIN)
+                        .build();
+                userRepository.save(admin);
+            }
+        };
+    }
 
 }

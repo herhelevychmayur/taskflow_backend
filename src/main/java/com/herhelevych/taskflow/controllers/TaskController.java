@@ -36,7 +36,7 @@ public class TaskController {
     private final TaskService taskService;
 
     @PostMapping
-    @PreAuthorize("@sec.isProjectAdminOrSuperadmin(#projectId)")
+    @PreAuthorize("@sec.hasProjectRole(#projectId, 'ROLE_ADMIN')")
     public ResponseEntity<TaskResponse> createTask(
             @PathVariable UUID projectId,
             @Valid @RequestBody TaskCreateRequest request,
@@ -67,7 +67,7 @@ public class TaskController {
     }
 
     @PatchMapping("/{taskId}")
-    @PreAuthorize("@sec.isProjectAdminOrSuperadmin(#projectId)")
+    @PreAuthorize("@sec.hasProjectRole(#projectId, 'ROLE_ADMIN')")
     public ResponseEntity<TaskResponse> updateTask(
             @PathVariable UUID projectId,
             @PathVariable UUID taskId,
@@ -77,7 +77,7 @@ public class TaskController {
     }
 
     @PatchMapping("/{taskId}/status")
-    @PreAuthorize("@sec.isSuperadmin() || @sec.hasAnyProjectRole(#projectId, 'ROLE_MEMBER', 'ROLE_ADMIN')")
+    @PreAuthorize("@sec.hasAnyProjectRole(#projectId, 'ROLE_MEMBER', 'ROLE_ADMIN')")
     public ResponseEntity<TaskResponse> updateTaskStatus(
             @PathVariable UUID projectId,
             @PathVariable UUID taskId,
@@ -88,7 +88,7 @@ public class TaskController {
     }
 
     @PatchMapping("/{taskId}/assignee")
-    @PreAuthorize("@sec.isProjectAdminOrSuperadmin(#projectId)")
+    @PreAuthorize("@sec.hasProjectRole(#projectId, 'ROLE_ADMIN')")
     public ResponseEntity<TaskResponse> assignTask(
             @PathVariable UUID projectId,
             @PathVariable UUID taskId,
@@ -98,7 +98,7 @@ public class TaskController {
     }
 
     @DeleteMapping("/{taskId}/assignee")
-    @PreAuthorize("@sec.isProjectAdminOrSuperadmin(#projectId)")
+    @PreAuthorize("@sec.hasProjectRole(#projectId, 'ROLE_ADMIN')")
     public ResponseEntity<TaskResponse> unassignTask(
             @PathVariable UUID projectId,
             @PathVariable UUID taskId
@@ -107,7 +107,7 @@ public class TaskController {
     }
 
     @DeleteMapping("/{taskId}")
-    @PreAuthorize("@sec.isProjectAdminOrSuperadmin(#projectId)")
+    @PreAuthorize("@sec.hasProjectRole(#projectId, 'ROLE_ADMIN')")
     public ResponseEntity<Void> deleteTask(
             @PathVariable UUID projectId,
             @PathVariable UUID taskId

@@ -12,29 +12,43 @@ import java.util.List;
 import java.util.UUID;
 
 public interface TaskRepository extends JpaRepository<Task, UUID> {
-    @Query("""
-            SELECT t FROM Task t
-            WHERE t.project.id = :projectId
-              AND (:status IS NULL OR t.status = :status)
-              AND (:priority IS NULL OR t.priority = :priority)
-              AND (:assigneeId IS NULL OR t.assignee_id.id = :assigneeId)
-            """)
+    @Query(value = """
+            SELECT t.id,
+                           t.title,
+                           t.description,
+                           t.status,
+                           t.priority,
+                           t.project_id,
+                           t.assignee_id,
+                           t.creator_id,
+                           t.created_at,
+                           t.due_date,
+                           t.updated_at
+                    FROM tasks t
+            WHERE t.project_id = :projectId
+               AND (:status IS NULL OR t.status = CAST(:status AS taskstatus))
+               AND (:priority IS NULL OR t.priority = CAST(:priority AS taskpriority))
+               AND (:assigneeId IS NULL OR t.assignee_id = CAST(:assigneeId AS UUID))
+            """, nativeQuery = true)
     List<Task> findProjectTasks(
             @Param("projectId") UUID projectId,
-            @Param("status") TaskStatus status,
-            @Param("priority") TaskPriority priority,
+            @Param("status") String status,
+            @Param("priority") String priority,
             @Param("assigneeId") UUID assigneeId
     );
 
     @Modifying
-    @Query("UPDATE Task t SET t.assignee_id = NULL WHERE t.project.id = :projectId AND t.assignee_id.id = :userId")
+    @Query("UPDATE Task t SET t.assignee = NULL WHERE t.project.id = :projectId AND t.assignee.id = :userId")
     void unassignProjectTasksFromUser(@Param("projectId") UUID projectId, @Param("userId") UUID userId);
 
     @Modifying
-    @Query("UPDATE Task t SET t.assignee_id = NULL WHERE t.assignee_id.id = :userId")
+    @Query("UPDATE Task t SET t.assignee = NULL WHERE t.assignee.id = :userId")
     void unassignAllTasksFromUser(@Param("userId") UUID userId);
 
     @Modifying
-    @Query("UPDATE Task t SET t.creator_id = NULL WHERE t.creator_id.id = :userId")
+    @Query("UPDATE Task t SET t.creator = NULL WHERE t.creator.id = :userId")
     void clearCreatorFromUserTasks(@Param("userId") UUID userId);
+
+    @Modifying
+    void deleteAllByProjectId(UUID projectId);
 }

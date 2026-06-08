@@ -14,4 +14,7 @@ public interface ProjectInviteRepository extends JpaRepository<ProjectInvite, UU
 
     @Modifying
     void deleteAllByInviteeIdOrInviterId(UUID inviteeId, UUID inviterId);
+
+    @Modifying
+    void deleteAllByProjectId(UUID projectId);
 }

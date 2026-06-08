@@ -15,6 +15,7 @@ public interface ProjectMapper {
 
     @Mapping(target = "userId", source = "user.id")
     @Mapping(target = "fullName", source = "user.fullName")
+    @Mapping(target = "username", source = "user.username")
     ProjectMemberResponse toMemberResponse(ProjectMember savedMember);
 
     @Mapping(target = "projectId", source = "project.id")

@@ -6,6 +6,7 @@ import com.herhelevych.taskflow.domain.dtos.ProjectCreateRequest;
 import com.herhelevych.taskflow.domain.dtos.*;
 import com.herhelevych.taskflow.domain.entities.*;
 import com.herhelevych.taskflow.mappers.ProjectMapper;
+import com.herhelevych.taskflow.repositories.CommentRepository;
 import com.herhelevych.taskflow.repositories.ProjectInviteRepository;
 import com.herhelevych.taskflow.repositories.ProjectMemberRepository;
 import com.herhelevych.taskflow.repositories.ProjectRepository;
@@ -30,6 +31,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectInviteRepository projectInviteRepository;
     private final UserRepository userRepository;
     private final TaskRepository taskRepository;
+    private final CommentRepository commentRepository;
     private final ProjectMapper projectMapper;
 
     @Override
@@ -68,6 +70,17 @@ public class ProjectServiceImpl implements ProjectService {
         return projectRepository.findById(projectId)
                 .map(projectMapper::toResponse)
                 .orElseThrow(() -> new EntityNotFoundException("Project not found"));
+    }
+
+    @Override
+    @Transactional
+    public ProjectResponse updateProject(UUID projectId, ProjectCreateRequest request) {
+        var project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new EntityNotFoundException("Project not found"));
+        project.setName(request.name());
+        project.setDescription(request.description());
+        var savedProject = projectRepository.save(project);
+        return projectMapper.toResponse(savedProject);
     }
 
     @Override
@@ -201,6 +214,10 @@ public class ProjectServiceImpl implements ProjectService {
         if (!projectRepository.existsById(projectId)) {
             throw new EntityNotFoundException("Project not found");
         }
+        commentRepository.deleteAllByTaskProjectId(projectId);
+        taskRepository.deleteAllByProjectId(projectId);
+        projectInviteRepository.deleteAllByProjectId(projectId);
+        projectMemberRepository.deleteAllByProjectId(projectId);
         projectRepository.deleteById(projectId);
     }
 

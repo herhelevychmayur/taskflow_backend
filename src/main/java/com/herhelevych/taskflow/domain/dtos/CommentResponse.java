@@ -8,6 +8,7 @@ public record CommentResponse(
         UUID taskId,
         UUID authorId,
         String authorFullName,
+        String authorUsername,
         String content,
         Instant createdAt,
         Instant updatedAt

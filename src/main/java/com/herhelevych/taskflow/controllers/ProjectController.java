@@ -39,9 +39,6 @@ public class ProjectController {
     public ResponseEntity<List<ProjectShortResponse>> getProjects(
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
-        if (userDetails.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_SUPERADMIN"))) {
-            return ResponseEntity.ok(projectService.getAllProjects());
-        }
         return ResponseEntity.ok(projectService.getUsersProjects(userDetails.getId()));
     }
 
@@ -51,8 +48,17 @@ public class ProjectController {
         return ResponseEntity.ok(projectService.createProject(projectId));
     }
 
+    @PatchMapping("/{projectId}")
+    @PreAuthorize("@sec.hasProjectRole(#projectId, 'ROLE_ADMIN')")
+    public ResponseEntity<ProjectResponse> updateProject(
+            @PathVariable UUID projectId,
+            @Valid @RequestBody ProjectCreateRequest request
+    ) {
+        return ResponseEntity.ok(projectService.updateProject(projectId, request));
+    }
+
     @PatchMapping("/{projectId}/archive")
-    @PreAuthorize("@sec.isProjectAdminOrSuperadmin(#projectId)")
+    @PreAuthorize("@sec.hasProjectRole(#projectId, 'ROLE_ADMIN')")
     public ResponseEntity<Void> archiveProject(
             @PathVariable UUID projectId,
             @RequestParam boolean isArchived
@@ -62,7 +68,7 @@ public class ProjectController {
     }
 
     @DeleteMapping("/{projectId}")
-    @PreAuthorize("@sec.isProjectAdminOrSuperadmin(#projectId)")
+    @PreAuthorize("@sec.hasProjectRole(#projectId, 'ROLE_ADMIN')")
     public ResponseEntity<Void> deleteProject(@PathVariable UUID projectId) {
         projectService.deleteProject(projectId);
         return ResponseEntity.noContent().build();
@@ -85,7 +91,7 @@ public class ProjectController {
     }
 
     @DeleteMapping("/{projectId}/members/{userId}")
-    @PreAuthorize("@sec.isProjectAdminOrSuperadmin(#projectId)")
+    @PreAuthorize("@sec.hasProjectRole(#projectId, 'ROLE_ADMIN')")
     public ResponseEntity<Void> removeMember(
             @PathVariable UUID projectId,
             @PathVariable UUID userId
@@ -95,7 +101,7 @@ public class ProjectController {
     }
 
     @PatchMapping("/{projectId}/members/{userId}/role")
-    @PreAuthorize("@sec.isProjectAdminOrSuperadmin(#projectId)")
+    @PreAuthorize("@sec.hasProjectRole(#projectId, 'ROLE_ADMIN')")
     public ResponseEntity<ProjectMemberResponse> updateMemberRole(
             @PathVariable UUID projectId,
             @PathVariable UUID userId,
@@ -106,7 +112,7 @@ public class ProjectController {
     }
 
     @PostMapping("/{projectId}/invites/{inviteeId}")
-    @PreAuthorize("@sec.isProjectAdminOrSuperadmin(#projectId)")
+    @PreAuthorize("@sec.hasProjectRole(#projectId, 'ROLE_ADMIN')")
     public ResponseEntity<ProjectMemberInviteResponse> inviteMember(
             @PathVariable UUID projectId,
             @PathVariable UUID inviteeId,
@@ -135,7 +141,7 @@ public class ProjectController {
     }
 
     @GetMapping("/{projectId}/invites")
-    @PreAuthorize("@sec.isProjectAdminOrSuperadmin(#projectId)")
+    @PreAuthorize("@sec.hasProjectRole(#projectId, 'ROLE_ADMIN')")
     public ResponseEntity<List<ProjectMemberInviteResponse>> getInvitesByProject(@PathVariable UUID projectId) {
         return ResponseEntity.ok(projectService.getInvitesByProject(projectId));
     }

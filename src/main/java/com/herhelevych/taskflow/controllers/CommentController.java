@@ -31,7 +31,7 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping
-    @PreAuthorize("@sec.isSuperadmin() || @sec.hasAnyProjectRole(#projectId, 'ROLE_MEMBER', 'ROLE_ADMIN')")
+    @PreAuthorize("@sec.hasAnyProjectRole(#projectId, 'ROLE_MEMBER', 'ROLE_ADMIN')")
     public ResponseEntity<CommentResponse> createComment(
             @PathVariable UUID projectId,
             @PathVariable UUID taskId,
@@ -43,7 +43,7 @@ public class CommentController {
     }
 
     @GetMapping
-    @PreAuthorize("@sec.isSuperadmin() || @sec.hasAnyProjectRole(#projectId, 'ROLE_MEMBER', 'ROLE_ADMIN')")
+    @PreAuthorize("@sec.hasAnyProjectRole(#projectId, 'ROLE_MEMBER', 'ROLE_ADMIN')")
     public ResponseEntity<List<CommentResponse>> getTaskComments(
             @PathVariable UUID projectId,
             @PathVariable UUID taskId
@@ -52,7 +52,7 @@ public class CommentController {
     }
 
     @PatchMapping("/{commentId}")
-    @PreAuthorize("@sec.isSuperadmin() || @sec.hasAnyProjectRole(#projectId, 'ROLE_MEMBER', 'ROLE_ADMIN')")
+    @PreAuthorize("@sec.hasAnyProjectRole(#projectId, 'ROLE_MEMBER', 'ROLE_ADMIN')")
     public ResponseEntity<CommentResponse> updateComment(
             @PathVariable UUID projectId,
             @PathVariable UUID taskId,

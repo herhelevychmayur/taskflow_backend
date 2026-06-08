@@ -1,6 +1,5 @@
 package com.herhelevych.taskflow.services.impl;
 
-import com.herhelevych.taskflow.domain.GlobalRole;
 import com.herhelevych.taskflow.domain.ProjectRole;
 import com.herhelevych.taskflow.domain.TaskPriority;
 import com.herhelevych.taskflow.domain.TaskStatus;
@@ -50,8 +49,9 @@ public class TaskServiceImpl implements TaskService {
                 .description(request.description())
                 .status(TaskStatus.TODO)
                 .priority(request.priority())
-                .assignee_id(assignee)
-                .creator_id(creator)
+                .assignee(assignee)
+                .creator(creator)
+                .dueDate(request.dueDate())
                 .build();
 
         return taskMapper.toResponse(taskRepository.save(task));
@@ -60,7 +60,13 @@ public class TaskServiceImpl implements TaskService {
     @Override
     @Transactional(readOnly = true)
     public List<TaskResponse> getProjectTasks(UUID projectId, TaskStatus status, TaskPriority priority, UUID assigneeId) {
-        return taskRepository.findProjectTasks(projectId, status, priority, assigneeId).stream()
+
+        return taskRepository.findProjectTasks(
+                        projectId,
+                        status != null ? status.name() : null,
+                        priority != null ? priority.name() : null,
+                        assigneeId
+                ).stream()
                 .map(taskMapper::toResponse)
                 .toList();
     }
@@ -88,7 +94,10 @@ public class TaskServiceImpl implements TaskService {
             task.setPriority(request.priority());
         }
         if (request.assigneeId() != null) {
-            task.setAssignee_id(getProjectMemberUser(projectId, request.assigneeId()));
+            task.setAssignee(getProjectMemberUser(projectId, request.assigneeId()));
+        }
+        if (request.dueDate() != null) {
+            task.setDueDate(request.dueDate());
         }
         return taskMapper.toResponse(taskRepository.save(task));
     }
@@ -97,7 +106,7 @@ public class TaskServiceImpl implements TaskService {
     @Transactional
     public TaskResponse assignTask(UUID projectId, UUID taskId, UUID assigneeId) {
         var task = getTaskInProject(projectId, taskId);
-        task.setAssignee_id(getProjectMemberUser(projectId, assigneeId));
+        task.setAssignee(getProjectMemberUser(projectId, assigneeId));
         return taskMapper.toResponse(taskRepository.save(task));
     }
 
@@ -105,7 +114,7 @@ public class TaskServiceImpl implements TaskService {
     @Transactional
     public TaskResponse unassignTask(UUID projectId, UUID taskId) {
         var task = getTaskInProject(projectId, taskId);
-        task.setAssignee_id(null);
+        task.setAssignee(null);
         return taskMapper.toResponse(taskRepository.save(task));
     }
 
@@ -113,8 +122,8 @@ public class TaskServiceImpl implements TaskService {
     @Transactional
     public TaskResponse updateAssignedTaskStatus(UUID projectId, UUID taskId, UUID userId, TaskStatus status) {
         var task = getTaskInProject(projectId, taskId);
-        if (!isProjectAdmin(projectId, userId) && !isTaskAssignee(task, userId)) {
-            throw new AccessDeniedException("Only project admins or the assigned user can update task status");
+        if (!isTaskAssignee(task, userId)) {
+            throw new AccessDeniedException("Only the assigned user can update task status");
         }
         task.setStatus(status);
         return taskMapper.toResponse(taskRepository.save(task));
@@ -146,15 +155,10 @@ public class TaskServiceImpl implements TaskService {
     }
 
     private boolean isTaskAssignee(Task task, UUID userId) {
-        return task.getAssignee_id() != null && task.getAssignee_id().getId().equals(userId);
+        return task.getAssignee() != null && task.getAssignee().getId().equals(userId);
     }
 
     private boolean isProjectAdmin(UUID projectId, UUID userId) {
-        var user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
-        if (user.getRole() == GlobalRole.ROLE_SUPERADMIN) {
-            return true;
-        }
         var memberId = new ProjectMemberId(userId, projectId);
         return projectMemberRepository.findById(memberId)
                 .map(member -> member.getRole() == ProjectRole.ROLE_ADMIN)

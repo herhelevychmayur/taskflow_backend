@@ -11,5 +11,6 @@ public interface CommentMapper {
     @Mapping(target = "taskId", source = "task.id")
     @Mapping(target = "authorId", source = "user.id")
     @Mapping(target = "authorFullName", source = "user.fullName")
+    @Mapping(target = "authorUsername", source = "user.username")
     CommentResponse toResponse(Comment comment);
 }

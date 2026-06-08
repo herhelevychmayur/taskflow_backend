@@ -52,11 +52,11 @@ public class User {
     @Builder.Default
     private List<Comment> comments = new ArrayList<>();
 
-    @OneToMany(mappedBy = "creator_id")
+    @OneToMany(mappedBy = "creator")
     @Builder.Default
     private List<Task> createdTasks = new ArrayList<>();
 
-    @OneToMany(mappedBy = "assignee_id")
+    @OneToMany(mappedBy = "assignee")
     @Builder.Default
     private List<Task> assignedTasks = new ArrayList<>();
 

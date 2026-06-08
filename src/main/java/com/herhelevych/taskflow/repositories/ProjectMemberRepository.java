@@ -15,4 +15,7 @@ public interface ProjectMemberRepository extends JpaRepository<ProjectMember, Pr
 
     @Modifying
     void deleteAllByUserId(UUID userId);
+
+    @Modifying
+    void deleteAllByProjectId(UUID projectId);
 }

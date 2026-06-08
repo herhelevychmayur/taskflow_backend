@@ -12,4 +12,7 @@ public interface CommentRepository extends JpaRepository<Comment, UUID> {
 
     @Modifying
     void deleteAllByUserId(UUID userId);
+
+    @Modifying
+    void deleteAllByTaskProjectId(UUID projectId);
 }

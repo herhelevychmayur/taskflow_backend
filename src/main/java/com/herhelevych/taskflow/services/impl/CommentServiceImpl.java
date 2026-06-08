@@ -1,6 +1,5 @@
 package com.herhelevych.taskflow.services.impl;
 
-import com.herhelevych.taskflow.domain.GlobalRole;
 import com.herhelevych.taskflow.domain.ProjectRole;
 import com.herhelevych.taskflow.domain.dtos.CommentCreateRequest;
 import com.herhelevych.taskflow.domain.dtos.CommentResponse;
@@ -102,11 +101,6 @@ public class CommentServiceImpl implements CommentService {
     }
 
     private boolean isProjectAdmin(UUID projectId, UUID userId) {
-        var user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
-        if (user.getRole() == GlobalRole.ROLE_SUPERADMIN) {
-            return true;
-        }
         var memberId = new ProjectMemberId(userId, projectId);
         return projectMemberRepository.findById(memberId)
                 .map(member -> member.getRole() == ProjectRole.ROLE_ADMIN)

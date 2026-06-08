@@ -10,6 +10,7 @@ import java.util.UUID;
 public interface ProjectService {
     ProjectResponse createProject(ProjectCreateRequest request, UUID userId);
     ProjectResponse createProject(UUID projectId);
+    ProjectResponse updateProject(UUID projectId, ProjectCreateRequest request);
     List<ProjectShortResponse> getUsersProjects(UUID userId);
     List<ProjectShortResponse> getAllProjects();
     void archiveProject(UUID projectId, boolean isArchived);

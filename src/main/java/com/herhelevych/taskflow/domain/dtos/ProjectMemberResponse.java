@@ -6,6 +6,7 @@ import java.util.UUID;
 public record ProjectMemberResponse(
         UUID userId,
         String fullName,
+        String username,
         ProjectRole role
 ) {
 }
