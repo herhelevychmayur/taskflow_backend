@@ -3,6 +3,7 @@ package com.herhelevych.taskflow.domain.entities;
 import com.herhelevych.taskflow.domain.TaskPriority;
 import com.herhelevych.taskflow.domain.TaskStatus;
 import jakarta.persistence.*;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -13,6 +14,11 @@ import java.util.UUID;
 
 @Table(name = "tasks")
 @Entity
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

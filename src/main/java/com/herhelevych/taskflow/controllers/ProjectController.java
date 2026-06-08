@@ -5,6 +5,8 @@ import com.herhelevych.taskflow.domain.ProjectRole;
 import com.herhelevych.taskflow.domain.dtos.*;
 import com.herhelevych.taskflow.security.UserDetailsImpl;
 import com.herhelevych.taskflow.services.ProjectService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +26,7 @@ public class ProjectController {
 
     @PostMapping
     public ResponseEntity<ProjectResponse> createProject(
-            @RequestBody ProjectCreateRequest request,
+            @Valid @RequestBody ProjectCreateRequest request,
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
         var projectResponse = projectService.createProject(request, userDetails.getId());
@@ -44,12 +46,13 @@ public class ProjectController {
     }
 
     @GetMapping("/{projectId}")
+    @PreAuthorize("@sec.isSuperadmin() || @sec.hasAnyProjectRole(#projectId, 'ROLE_MEMBER', 'ROLE_ADMIN')")
     public ResponseEntity<ProjectResponse> getProject(@PathVariable UUID projectId) {
         return ResponseEntity.ok(projectService.createProject(projectId));
     }
 
     @PatchMapping("/{projectId}/archive")
-    @PreAuthorize("@sec.hasProjectRole(#projectId, 'ROLE_ADMIN')")
+    @PreAuthorize("@sec.isProjectAdminOrSuperadmin(#projectId)")
     public ResponseEntity<Void> archiveProject(
             @PathVariable UUID projectId,
             @RequestParam boolean isArchived
@@ -59,7 +62,7 @@ public class ProjectController {
     }
 
     @DeleteMapping("/{projectId}")
-    @PreAuthorize("@sec.hasProjectRole(#projectId, 'ROLE_ADMIN')")
+    @PreAuthorize("@sec.isProjectAdminOrSuperadmin(#projectId)")
     public ResponseEntity<Void> deleteProject(@PathVariable UUID projectId) {
         projectService.deleteProject(projectId);
         return ResponseEntity.noContent().build();
@@ -67,6 +70,7 @@ public class ProjectController {
 
 
     @GetMapping("/{projectId}/members")
+    @PreAuthorize("@sec.isSuperadmin() || @sec.hasAnyProjectRole(#projectId, 'ROLE_MEMBER', 'ROLE_ADMIN')")
     public ResponseEntity<List<ProjectMemberResponse>> getMembers(@PathVariable UUID projectId) {
         return ResponseEntity.ok(projectService.getProjectMembers(projectId));
     }
@@ -81,7 +85,7 @@ public class ProjectController {
     }
 
     @DeleteMapping("/{projectId}/members/{userId}")
-    @PreAuthorize("@sec.hasProjectRole(#projectId, 'ROLE_ADMIN')")
+    @PreAuthorize("@sec.isProjectAdminOrSuperadmin(#projectId)")
     public ResponseEntity<Void> removeMember(
             @PathVariable UUID projectId,
             @PathVariable UUID userId
@@ -91,18 +95,18 @@ public class ProjectController {
     }
 
     @PatchMapping("/{projectId}/members/{userId}/role")
-    @PreAuthorize("@sec.hasProjectRole(#projectId, 'ROLE_ADMIN')")
+    @PreAuthorize("@sec.isProjectAdminOrSuperadmin(#projectId)")
     public ResponseEntity<ProjectMemberResponse> updateMemberRole(
             @PathVariable UUID projectId,
             @PathVariable UUID userId,
-            @RequestBody ProjectRole role,
+            @NotNull @RequestBody ProjectRole role,
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
         return ResponseEntity.ok(projectService.updateMemberRole(projectId, userDetails.getId(), userId, role));
     }
 
     @PostMapping("/{projectId}/invites/{inviteeId}")
-    @PreAuthorize("@sec.hasProjectRole(#projectId, 'ROLE_ADMIN')")
+    @PreAuthorize("@sec.isProjectAdminOrSuperadmin(#projectId)")
     public ResponseEntity<ProjectMemberInviteResponse> inviteMember(
             @PathVariable UUID projectId,
             @PathVariable UUID inviteeId,
@@ -115,7 +119,7 @@ public class ProjectController {
     @PatchMapping("/invites/{inviteId}")
     public ResponseEntity<ProjectMemberInviteResponse> respondToInvite(
             @PathVariable UUID inviteId,
-            @RequestBody InviteStatus status,
+            @NotNull @RequestBody InviteStatus status,
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
         return ResponseEntity.ok(
@@ -131,7 +135,7 @@ public class ProjectController {
     }
 
     @GetMapping("/{projectId}/invites")
-    @PreAuthorize("@sec.hasProjectRole(#projectId, 'ROLE_ADMIN')")
+    @PreAuthorize("@sec.isProjectAdminOrSuperadmin(#projectId)")
     public ResponseEntity<List<ProjectMemberInviteResponse>> getInvitesByProject(@PathVariable UUID projectId) {
         return ResponseEntity.ok(projectService.getInvitesByProject(projectId));
     }

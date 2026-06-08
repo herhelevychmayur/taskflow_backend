@@ -4,12 +4,8 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.UUID;
 
-public record ProjectMemberInviteRequest(
+public record TaskAssignRequest(
         @NotNull
-        UUID projectId,
-
-        @NotNull
-        UUID inviteeId
+        UUID assigneeId
 ) {
-
 }
