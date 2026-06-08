@@ -4,6 +4,7 @@ import com.herhelevych.taskflow.domain.TaskPriority;
 import com.herhelevych.taskflow.domain.TaskStatus;
 import com.herhelevych.taskflow.domain.entities.Task;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -24,4 +25,16 @@ public interface TaskRepository extends JpaRepository<Task, UUID> {
             @Param("priority") TaskPriority priority,
             @Param("assigneeId") UUID assigneeId
     );
+
+    @Modifying
+    @Query("UPDATE Task t SET t.assignee_id = NULL WHERE t.project.id = :projectId AND t.assignee_id.id = :userId")
+    void unassignProjectTasksFromUser(@Param("projectId") UUID projectId, @Param("userId") UUID userId);
+
+    @Modifying
+    @Query("UPDATE Task t SET t.assignee_id = NULL WHERE t.assignee_id.id = :userId")
+    void unassignAllTasksFromUser(@Param("userId") UUID userId);
+
+    @Modifying
+    @Query("UPDATE Task t SET t.creator_id = NULL WHERE t.creator_id.id = :userId")
+    void clearCreatorFromUserTasks(@Param("userId") UUID userId);
 }

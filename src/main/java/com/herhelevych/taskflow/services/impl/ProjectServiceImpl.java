@@ -9,6 +9,7 @@ import com.herhelevych.taskflow.mappers.ProjectMapper;
 import com.herhelevych.taskflow.repositories.ProjectInviteRepository;
 import com.herhelevych.taskflow.repositories.ProjectMemberRepository;
 import com.herhelevych.taskflow.repositories.ProjectRepository;
+import com.herhelevych.taskflow.repositories.TaskRepository;
 import com.herhelevych.taskflow.repositories.UserRepository;
 import com.herhelevych.taskflow.services.ProjectService;
 import jakarta.persistence.EntityNotFoundException;
@@ -28,6 +29,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectMemberRepository projectMemberRepository;
     private final ProjectInviteRepository projectInviteRepository;
     private final UserRepository userRepository;
+    private final TaskRepository taskRepository;
     private final ProjectMapper projectMapper;
 
     @Override
@@ -180,6 +182,7 @@ public class ProjectServiceImpl implements ProjectService {
         if (!projectMemberRepository.existsById(memberId)) {
             throw new EntityNotFoundException("Project member not found");
         }
+        taskRepository.unassignProjectTasksFromUser(projectId, userId);
         projectMemberRepository.deleteById(memberId);
     }
 
