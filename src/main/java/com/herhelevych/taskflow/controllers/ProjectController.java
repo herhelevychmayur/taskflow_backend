@@ -71,6 +71,15 @@ public class ProjectController {
         return ResponseEntity.ok(projectService.getProjectMembers(projectId));
     }
 
+    @GetMapping("/{projectId}/role")
+    @PreAuthorize("@sec.hasAnyProjectRole(#projectId, 'ROLE_MEMBER', 'ROLE_ADMIN')")
+    public ResponseEntity<ProjectMemberResponse> getMemberRole(
+            @PathVariable UUID projectId,
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
+        return ResponseEntity.ok(projectService.getProjectMember(projectId, userDetails.getId()));
+    }
+
     @DeleteMapping("/{projectId}/members/{userId}")
     @PreAuthorize("@sec.hasProjectRole(#projectId, 'ROLE_ADMIN')")
     public ResponseEntity<Void> removeMember(
@@ -86,9 +95,10 @@ public class ProjectController {
     public ResponseEntity<ProjectMemberResponse> updateMemberRole(
             @PathVariable UUID projectId,
             @PathVariable UUID userId,
-            @RequestBody ProjectRole role
+            @RequestBody ProjectRole role,
+            @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
-        return ResponseEntity.ok(projectService.updateMemberRole(projectId, userId, role));
+        return ResponseEntity.ok(projectService.updateMemberRole(projectId, userDetails.getId(), userId, role));
     }
 
     @PostMapping("/{projectId}/invites/{inviteeId}")

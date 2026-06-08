@@ -2,6 +2,7 @@ package com.herhelevych.taskflow.mappers;
 
 import com.herhelevych.taskflow.domain.dtos.LoginRequest;
 import com.herhelevych.taskflow.domain.dtos.RegisterRequest;
+import com.herhelevych.taskflow.domain.dtos.UserResponse;
 import com.herhelevych.taskflow.domain.entities.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -13,4 +14,5 @@ public interface UserMapper {
 
     @Mapping(target = "password", expression = "java(passwordEncoder.encode(request.password()))")
     User toEntity(RegisterRequest request, PasswordEncoder passwordEncoder);
+    UserResponse toResponse(User user);
 }

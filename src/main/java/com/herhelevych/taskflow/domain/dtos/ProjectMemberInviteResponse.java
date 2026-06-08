@@ -9,10 +9,11 @@ public record ProjectMemberInviteResponse(
         UUID projectId,
         String projectName,
         UUID inviterId,
-        String inviterUsername,
+        String inviterFullName,
         UUID inviteeId,
-        String inviteeUsername,
+        String inviteeFullName,
         InviteStatus status,
-        Instant createdAt
+        Instant createdAt,
+        Instant updatedAt
 ) {
 }

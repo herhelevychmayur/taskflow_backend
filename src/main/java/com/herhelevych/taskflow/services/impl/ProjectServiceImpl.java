@@ -136,7 +136,10 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional
-    public ProjectMemberResponse updateMemberRole(UUID projectId, UUID userId, ProjectRole role) {
+    public ProjectMemberResponse updateMemberRole(UUID projectId, UUID adminId, UUID userId, ProjectRole role) {
+        if (userId.equals(adminId))
+            throw new IllegalArgumentException("You cannot change your own role");
+
         var memberId = new ProjectMemberId(userId, projectId);
         var member = projectMemberRepository.findById(memberId)
                 .orElseThrow(() -> new EntityNotFoundException("Project member not found"));
@@ -196,5 +199,14 @@ public class ProjectServiceImpl implements ProjectService {
             throw new EntityNotFoundException("Project not found");
         }
         projectRepository.deleteById(projectId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ProjectMemberResponse getProjectMember(UUID projectId, UUID id) {
+        var memberId = new ProjectMemberId(id, projectId);
+        return projectMemberRepository.findById(memberId)
+                .map(projectMapper::toMemberResponse)
+                .orElseThrow(() -> new EntityNotFoundException("Project member not found"));
     }
 }

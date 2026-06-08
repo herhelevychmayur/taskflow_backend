@@ -16,9 +16,10 @@ public interface ProjectService {
     void deleteProject(UUID projectId);
     ProjectMemberInviteResponse inviteMember(UUID projectId, UUID inviterId, UUID inviteeId);
     ProjectMemberInviteResponse respondToInvite(UUID inviteId, UUID inviteeId, InviteStatus status);
-    ProjectMemberResponse updateMemberRole(UUID projectId, UUID userId, ProjectRole role);
+    ProjectMemberResponse updateMemberRole(UUID projectId, UUID adminId, UUID userId, ProjectRole role);
     List<ProjectMemberInviteResponse> getInvitesByUser(UUID userId);
     List<ProjectMemberInviteResponse> getInvitesByProject(UUID projectId);
     List<ProjectMemberResponse> getProjectMembers(UUID projectId);
     void removeMember(UUID projectId, UUID userId);
+    ProjectMemberResponse getProjectMember(UUID projectId, UUID id);
 }
