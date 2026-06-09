@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Pattern;
 public record RegisterRequest(
         @NotBlank
         @Size(max = 50)
-        @Pattern(regexp = "^[a-zA-Z]+$", message = "must contain only english letters")
+        @Pattern(regexp = "^[a-zA-Z0-9]+$", message = "must contain only english letters and numbers")
         String username,
 
         @NotBlank
