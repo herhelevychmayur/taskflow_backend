@@ -11,6 +11,7 @@ import org.mapstruct.ReportingPolicy;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ProjectMapper {
     Project toEntity(ProjectCreateRequest request);
+    @Mapping(target = "isArchived", source = "archived")
     ProjectResponse toResponse(Project project);
 
     @Mapping(target = "userId", source = "user.id")
@@ -26,5 +27,5 @@ public interface ProjectMapper {
     @Mapping(target = "inviteeFullName", source = "invitee.fullName")
     ProjectMemberInviteResponse toInviteResponse(ProjectInvite savedMember);
 
-    ProjectShortResponse toShortResponse(Project project);
+
 }

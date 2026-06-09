@@ -1,7 +1,7 @@
 package com.herhelevych.taskflow.controllers;
 
 import com.herhelevych.taskflow.domain.dtos.DashboardStatsResponse;
-import com.herhelevych.taskflow.domain.dtos.ProjectShortResponse;
+import com.herhelevych.taskflow.domain.dtos.ProjectResponse;
 import com.herhelevych.taskflow.domain.dtos.UserResponse;
 import com.herhelevych.taskflow.security.UserDetailsImpl;
 import com.herhelevych.taskflow.services.DashboardService;
@@ -28,7 +28,7 @@ public class DashboardController {
     private final DashboardService dashboardService;
 
     @GetMapping("/projects")
-    public ResponseEntity<List<ProjectShortResponse>> getProjects() {
+    public ResponseEntity<List<ProjectResponse>> getProjects() {
         return ResponseEntity.ok(dashboardService.getProjects());
     }
 

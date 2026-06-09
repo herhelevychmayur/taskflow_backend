@@ -43,7 +43,7 @@ public class CommentController {
     }
 
     @GetMapping
-    @PreAuthorize("@sec.hasAnyProjectRole(#projectId, 'ROLE_MEMBER', 'ROLE_ADMIN')")
+    @PreAuthorize("@sec.isSuperadmin() || @sec.hasAnyProjectRole(#projectId, 'ROLE_MEMBER', 'ROLE_ADMIN')")
     public ResponseEntity<List<CommentResponse>> getTaskComments(
             @PathVariable UUID projectId,
             @PathVariable UUID taskId
@@ -64,7 +64,7 @@ public class CommentController {
     }
 
     @DeleteMapping("/{commentId}")
-    @PreAuthorize("@sec.isSuperadmin() || @sec.hasAnyProjectRole(#projectId, 'ROLE_MEMBER', 'ROLE_ADMIN')")
+    @PreAuthorize("@sec.hasAnyProjectRole(#projectId, 'ROLE_MEMBER', 'ROLE_ADMIN')")
     public ResponseEntity<Void> deleteComment(
             @PathVariable UUID projectId,
             @PathVariable UUID taskId,

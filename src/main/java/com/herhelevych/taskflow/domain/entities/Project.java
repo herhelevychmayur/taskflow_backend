@@ -23,7 +23,7 @@ public class Project {
     @Column(nullable = false, length = 100)
     private String name;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(length = 200)
     private String description;
 
     @Column(nullable = false)

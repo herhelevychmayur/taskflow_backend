@@ -1,5 +1,7 @@
 package com.herhelevych.taskflow.services.impl;
 
+import com.herhelevych.taskflow.aspect.PreventIfArchived;
+import com.herhelevych.taskflow.aspect.TargetType;
 import com.herhelevych.taskflow.domain.InviteStatus;
 import com.herhelevych.taskflow.domain.ProjectRole;
 import com.herhelevych.taskflow.domain.dtos.ProjectCreateRequest;
@@ -74,6 +76,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional
+    @PreventIfArchived(type = TargetType.PROJECT, idParam = "projectId")
     public ProjectResponse updateProject(UUID projectId, ProjectCreateRequest request) {
         var project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new EntityNotFoundException("Project not found"));
@@ -85,23 +88,24 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ProjectShortResponse> getUsersProjects(UUID userId) {
+    public List<ProjectResponse> getUsersProjects(UUID userId) {
         return projectMemberRepository.findAllByUserId(userId).stream()
                 .map(ProjectMember::getProject)
-                .map(projectMapper::toShortResponse)
+                .map(projectMapper::toResponse)
                 .toList();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<ProjectShortResponse> getAllProjects() {
+    public List<ProjectResponse> getAllProjects() {
         return projectRepository.findAll().stream()
-                .map(projectMapper::toShortResponse)
+                .map(projectMapper::toResponse)
                 .toList();
     }
 
     @Override
     @Transactional
+    @PreventIfArchived(type = TargetType.PROJECT, idParam = "projectId")
     public ProjectMemberInviteResponse inviteMember(UUID projectId, UUID inviterId, UUID inviteeId) {
         var project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new EntityNotFoundException("Project not found"));
@@ -109,6 +113,10 @@ public class ProjectServiceImpl implements ProjectService {
                 .orElseThrow(() -> new EntityNotFoundException("Inviter not found"));
         var invitee = userRepository.findById(inviteeId)
                 .orElseThrow(() -> new EntityNotFoundException("Invitee not found"));
+
+        if (projectMemberRepository.existsById(new ProjectMemberId(inviteeId, projectId))) {
+            throw new IllegalArgumentException("User is already a member of this project");
+        }
 
         var invite = ProjectInvite.builder()
                 .project(project)
@@ -123,6 +131,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional
+    @PreventIfArchived(type = TargetType.INVITE, idParam = "inviteId")
     public ProjectMemberInviteResponse respondToInvite(UUID inviteId, UUID inviteeId, InviteStatus status) {
         var invite = projectInviteRepository.findById(inviteId)
                 .orElseThrow(() -> new EntityNotFoundException("Invite not found"));
@@ -151,6 +160,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional
+    @PreventIfArchived(type = TargetType.PROJECT, idParam = "projectId")
     public ProjectMemberResponse updateMemberRole(UUID projectId, UUID adminId, UUID userId, ProjectRole role) {
         if (userId.equals(adminId))
             throw new IllegalArgumentException("You cannot change your own role");
@@ -190,6 +200,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional
+    @PreventIfArchived(type = TargetType.PROJECT, idParam = "projectId")
     public void removeMember(UUID projectId, UUID userId) {
         var memberId = new ProjectMemberId(userId, projectId);
         if (!projectMemberRepository.existsById(memberId)) {
@@ -228,5 +239,42 @@ public class ProjectServiceImpl implements ProjectService {
         return projectMemberRepository.findById(memberId)
                 .map(projectMapper::toMemberResponse)
                 .orElseThrow(() -> new EntityNotFoundException("Project member not found"));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ProjectStatsResponse getProjectStats(UUID projectId) {
+        if (!projectRepository.existsById(projectId)) {
+            throw new EntityNotFoundException("Project not found");
+        }
+
+        long totalTasks = taskRepository.countByProjectId(projectId);
+        long totalMembers = projectMemberRepository.findAllByProjectId(projectId).size();
+        long totalComments = commentRepository.countByTaskProjectId(projectId);
+
+        long todoTasks = taskRepository.countByProjectIdAndStatus(projectId, com.herhelevych.taskflow.domain.TaskStatus.TODO);
+        long inProgressTasks = taskRepository.countByProjectIdAndStatus(projectId, com.herhelevych.taskflow.domain.TaskStatus.IN_PROGRESS);
+        long doneTasks = taskRepository.countByProjectIdAndStatus(projectId, com.herhelevych.taskflow.domain.TaskStatus.DONE);
+
+        long lowPriority = taskRepository.countByProjectIdAndPriority(projectId, com.herhelevych.taskflow.domain.TaskPriority.LOW);
+        long mediumPriority = taskRepository.countByProjectIdAndPriority(projectId, com.herhelevych.taskflow.domain.TaskPriority.MEDIUM);
+        long highPriority = taskRepository.countByProjectIdAndPriority(projectId, com.herhelevych.taskflow.domain.TaskPriority.HIGH);
+
+        long overdueTasks = taskRepository.countByProjectIdAndDueDateBeforeAndStatusNot(
+                projectId, java.time.Instant.now(), com.herhelevych.taskflow.domain.TaskStatus.DONE
+        );
+
+        return new ProjectStatsResponse(
+                totalTasks,
+                totalMembers,
+                totalComments,
+                overdueTasks,
+                todoTasks,
+                inProgressTasks,
+                doneTasks,
+                lowPriority,
+                mediumPriority,
+                highPriority
+        );
     }
 }

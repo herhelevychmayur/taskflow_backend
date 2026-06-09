@@ -36,7 +36,7 @@ public class ProjectController {
 
 
     @GetMapping
-    public ResponseEntity<List<ProjectShortResponse>> getProjects(
+    public ResponseEntity<List<ProjectResponse>> getProjects(
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
         return ResponseEntity.ok(projectService.getUsersProjects(userDetails.getId()));
@@ -82,7 +82,7 @@ public class ProjectController {
     }
 
     @GetMapping("/{projectId}/role")
-    @PreAuthorize("@sec.hasAnyProjectRole(#projectId, 'ROLE_MEMBER', 'ROLE_ADMIN')")
+    @PreAuthorize("@sec.isSuperadmin() || @sec.hasAnyProjectRole(#projectId, 'ROLE_MEMBER', 'ROLE_ADMIN')")
     public ResponseEntity<ProjectMemberResponse> getMemberRole(
             @PathVariable UUID projectId,
             @AuthenticationPrincipal UserDetailsImpl userDetails
@@ -144,5 +144,11 @@ public class ProjectController {
     @PreAuthorize("@sec.hasProjectRole(#projectId, 'ROLE_ADMIN')")
     public ResponseEntity<List<ProjectMemberInviteResponse>> getInvitesByProject(@PathVariable UUID projectId) {
         return ResponseEntity.ok(projectService.getInvitesByProject(projectId));
+    }
+
+    @GetMapping("/{projectId}/stats")
+    @PreAuthorize("@sec.isSuperadmin() || @sec.hasProjectRole(#projectId, 'ROLE_ADMIN')")
+    public ResponseEntity<ProjectStatsResponse> getProjectStats(@PathVariable UUID projectId) {
+        return ResponseEntity.ok(projectService.getProjectStats(projectId));
     }
 }

@@ -2,7 +2,7 @@ package com.herhelevych.taskflow.services.impl;
 
 import com.herhelevych.taskflow.domain.GlobalRole;
 import com.herhelevych.taskflow.domain.dtos.DashboardStatsResponse;
-import com.herhelevych.taskflow.domain.dtos.ProjectShortResponse;
+import com.herhelevych.taskflow.domain.dtos.ProjectResponse;
 import com.herhelevych.taskflow.domain.dtos.UserResponse;
 import com.herhelevych.taskflow.mappers.ProjectMapper;
 import com.herhelevych.taskflow.mappers.UserMapper;
@@ -36,9 +36,9 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ProjectShortResponse> getProjects() {
+    public List<ProjectResponse> getProjects() {
         return projectRepository.findAll().stream()
-                .map(projectMapper::toShortResponse)
+                .map(projectMapper::toResponse)
                 .toList();
     }
 

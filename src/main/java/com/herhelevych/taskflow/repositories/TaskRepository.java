@@ -8,10 +8,20 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
 public interface TaskRepository extends JpaRepository<Task, UUID> {
+
+    long countByProjectId(UUID projectId);
+
+    long countByProjectIdAndStatus(UUID projectId, TaskStatus status);
+
+    long countByProjectIdAndPriority(UUID projectId, TaskPriority priority);
+
+    long countByProjectIdAndDueDateBeforeAndStatusNot(UUID projectId, Instant now, TaskStatus status);
+
     @Query(value = """
             SELECT t.id,
                            t.title,
@@ -37,18 +47,19 @@ public interface TaskRepository extends JpaRepository<Task, UUID> {
             @Param("assigneeId") UUID assigneeId
     );
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("UPDATE Task t SET t.assignee = NULL WHERE t.project.id = :projectId AND t.assignee.id = :userId")
     void unassignProjectTasksFromUser(@Param("projectId") UUID projectId, @Param("userId") UUID userId);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("UPDATE Task t SET t.assignee = NULL WHERE t.assignee.id = :userId")
     void unassignAllTasksFromUser(@Param("userId") UUID userId);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("UPDATE Task t SET t.creator = NULL WHERE t.creator.id = :userId")
     void clearCreatorFromUserTasks(@Param("userId") UUID userId);
 
-    @Modifying
-    void deleteAllByProjectId(UUID projectId);
+    @Modifying(clearAutomatically = true)
+    @Query("DELETE FROM Task t WHERE t.project.id = :projectId")
+    void deleteAllByProjectId(@Param("projectId") UUID projectId);
 }

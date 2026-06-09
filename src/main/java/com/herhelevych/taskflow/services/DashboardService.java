@@ -1,14 +1,14 @@
 package com.herhelevych.taskflow.services;
 
 import com.herhelevych.taskflow.domain.dtos.DashboardStatsResponse;
-import com.herhelevych.taskflow.domain.dtos.ProjectShortResponse;
+import com.herhelevych.taskflow.domain.dtos.ProjectResponse;
 import com.herhelevych.taskflow.domain.dtos.UserResponse;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface DashboardService {
-    List<ProjectShortResponse> getProjects();
+    List<ProjectResponse> getProjects();
 
     List<UserResponse> getUsers();
 

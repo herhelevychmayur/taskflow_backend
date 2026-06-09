@@ -1,5 +1,7 @@
 package com.herhelevych.taskflow.services.impl;
 
+import com.herhelevych.taskflow.aspect.PreventIfArchived;
+import com.herhelevych.taskflow.aspect.TargetType;
 import com.herhelevych.taskflow.domain.ProjectRole;
 import com.herhelevych.taskflow.domain.TaskPriority;
 import com.herhelevych.taskflow.domain.TaskStatus;
@@ -36,6 +38,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional
+    @PreventIfArchived(type = TargetType.PROJECT, idParam = "projectId")
     public TaskResponse createTask(UUID projectId, TaskCreateRequest request, UUID creatorId) {
         var project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new EntityNotFoundException("Project not found"));
@@ -79,6 +82,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional
+    @PreventIfArchived(type = TargetType.PROJECT, idParam = "projectId")
     public TaskResponse updateTask(UUID projectId, UUID taskId, TaskUpdateRequest request) {
         var task = getTaskInProject(projectId, taskId);
         if (request.title() != null) {
@@ -104,6 +108,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional
+    @PreventIfArchived(type = TargetType.PROJECT, idParam = "projectId")
     public TaskResponse assignTask(UUID projectId, UUID taskId, UUID assigneeId) {
         var task = getTaskInProject(projectId, taskId);
         task.setAssignee(getProjectMemberUser(projectId, assigneeId));
@@ -112,6 +117,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional
+    @PreventIfArchived(type = TargetType.PROJECT, idParam = "projectId")
     public TaskResponse unassignTask(UUID projectId, UUID taskId) {
         var task = getTaskInProject(projectId, taskId);
         task.setAssignee(null);
@@ -120,6 +126,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional
+    @PreventIfArchived(type = TargetType.PROJECT, idParam = "projectId")
     public TaskResponse updateAssignedTaskStatus(UUID projectId, UUID taskId, UUID userId, TaskStatus status) {
         var task = getTaskInProject(projectId, taskId);
         if (!isTaskAssignee(task, userId)) {
@@ -131,6 +138,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional
+    @PreventIfArchived(type = TargetType.PROJECT, idParam = "projectId")
     public void deleteTask(UUID projectId, UUID taskId) {
         var task = getTaskInProject(projectId, taskId);
         taskRepository.delete(task);

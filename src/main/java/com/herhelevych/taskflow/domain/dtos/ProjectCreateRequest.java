@@ -8,8 +8,7 @@ public record ProjectCreateRequest(
         @Size(max = 100)
         String name,
 
-        @NotBlank
-        @Size(max = 5000)
+        @Size(max = 200)
         String description
 ) {
 }

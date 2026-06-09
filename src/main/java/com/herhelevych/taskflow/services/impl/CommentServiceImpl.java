@@ -1,5 +1,7 @@
 package com.herhelevych.taskflow.services.impl;
 
+import com.herhelevych.taskflow.aspect.PreventIfArchived;
+import com.herhelevych.taskflow.aspect.TargetType;
 import com.herhelevych.taskflow.domain.ProjectRole;
 import com.herhelevych.taskflow.domain.dtos.CommentCreateRequest;
 import com.herhelevych.taskflow.domain.dtos.CommentResponse;
@@ -34,6 +36,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
+    @PreventIfArchived(type = TargetType.PROJECT, idParam = "projectId")
     public CommentResponse createComment(UUID projectId, UUID taskId, UUID authorId, CommentCreateRequest request) {
         var task = getTaskInProject(projectId, taskId);
         var author = userRepository.findById(authorId)
@@ -59,6 +62,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
+    @PreventIfArchived(type = TargetType.PROJECT, idParam = "projectId")
     public CommentResponse updateComment(UUID projectId, UUID taskId, UUID commentId, UUID userId, CommentUpdateRequest request) {
         var comment = getCommentInTask(projectId, taskId, commentId);
         requireCommentOwnerOrProjectAdmin(projectId, comment, userId);
@@ -68,6 +72,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
+    @PreventIfArchived(type = TargetType.PROJECT, idParam = "projectId")
     public void deleteComment(UUID projectId, UUID taskId, UUID commentId, UUID userId) {
         var comment = getCommentInTask(projectId, taskId, commentId);
         requireCommentOwnerOrProjectAdmin(projectId, comment, userId);
